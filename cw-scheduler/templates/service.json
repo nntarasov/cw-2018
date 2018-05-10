@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: ${service_name}
   labels:
-    auto_created: true
+    auto_created: "true"
 spec:
   selector:
     pod_app: ${pod_app_label}
@@ -11,3 +11,5 @@ spec:
   - protocol: TCP
     port: ${port}
     targetPort: ${port}
+    nodePort: ${port}
+  type: NodePort

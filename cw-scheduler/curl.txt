@@ -2,8 +2,23 @@ curl http://localhost:13337/schedule -d '
 {
   "applications": [
     {
-      "image": "ntarasov\/py-service-template",
-      "port": 80,
+      "image": "ntarasov\/py-service",
+      "port": 1665,
+      "replicas": [
+        { "node": "cw-node-0" },
+        { "node": "cw-node-2" }
+      ]
+    }
+  ]
+}
+' -H 'Content-Type:application/json' -i
+
+curl http://node-0.ntarasov.ru:13337/schedule -d '
+{
+  "applications": [
+    {
+      "image": "ntarasov\/py-service",
+      "port": 1665,
       "replicas": [
         { "node": "cw-node-0" },
         { "node": "cw-node-2" }

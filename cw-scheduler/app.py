@@ -11,7 +11,6 @@ import time
 from string import Template
 
 app = Flask(__name__)
-schedule_lock = False
 
 @app.route("/")
 def default():
@@ -68,11 +67,7 @@ def schedule():
             break
 
     # Starts new
-    out = exec_shell('ls .scheduled | grep .conf | xargs -t -I \{\} kubectl create -f \{\}')
-    print(out)
-
-    # TODO: Wait until all will start
-    # ...
+    print exec_shell(['./run-scheduled.sh'])
 
     msg = json.dumps({'status': 'ok'})
     return Response(msg, status=200, mimetype='application/json')
