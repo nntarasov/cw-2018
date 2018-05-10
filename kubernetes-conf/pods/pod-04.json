@@ -1,0 +1,19 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "pod-04",
+    "labels": {
+      "name": "pod-04"
+    },
+    "namespace": "default"
+  },
+  "spec": {
+    "containers": [{
+      "name": "hello-world",
+      "image": "ntarasov/hello-world",
+      "ports": [{ "containerPort": 80 }]
+    }],
+    "nodeName": "cw-node-4"
+  }
+}

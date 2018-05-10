@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ${service_name}
+  labels:
+    auto_created: true
+spec:
+  selector:
+    pod_app: ${pod_app_label}
+  ports:
+  - protocol: TCP
+    port: ${port}
+    targetPort: ${port}

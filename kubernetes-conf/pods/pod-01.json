@@ -1,0 +1,20 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "pod-01",
+    "labels": {
+      "name": "pod-01"
+    },
+    "namespace": "default"
+  },
+  "spec": {
+    "containers": [{
+      "name": "servicestack-sample",
+      "image": "marfarma/servicestack.hello:latest",
+      "ports": [{ "containerPort": 80 }]
+    }],
+    "nodeName": "cw-node-1"
+  }
+}
+

@@ -1,0 +1,20 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "${pod_name}",
+    "labels": {
+      "pod_app": "${pod_app_label}",
+      "auto_created": "true"
+    },
+    "namespace": "default"
+  },
+  "spec": {
+    "containers": [{
+      "name": "${container_name}",
+      "image": "${image}",
+      "ports": [{ "containerPort": ${port} }]
+    }],
+    "nodeName": "${node_name}"
+  }
+}
