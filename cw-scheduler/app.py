@@ -56,7 +56,11 @@ def schedule():
         generate_application_service(image, port)
 
     # Stops all running entities by label
-    exec_shell(['kubectl', 'delete', 'pods,services', '-l', 'auto_created=true'])
+    try:
+        print exec_shell(['kubectl', 'delete', 'pods,services', '-l', 'auto_created=true'])
+    except:
+        msg = json.dumps({'error': 'cannot delete existing pods/services by label'})
+        return Response(msg, status=400, mimetype='application/json')
 
     # Wait while all pods will be stopped
     while True:
@@ -67,7 +71,27 @@ def schedule():
             break
 
     # Starts new
-    print exec_shell(['./run-scheduled.sh'])
+    try:
+        print exec_shell(['./run-scheduled.sh'])
+    except:
+        msg = json.dumps({'error': 'cannot run pods/services'})
+        return Response(msg, status=400, mimetype='application/json')
+
+    # Generate runtime config
+    for app in apps:
+        app_name = str(app['image']).split('/')[-1]
+        print 'get-actual-port.sh ' + app_name
+        try:
+            app['actual_port'] = int(exec_shell(['./get-actual-port.sh', app_name]))
+            print 'Actual port ' + app_name + ' -> ' + str(app['actual_port'])
+        except:
+            msg = json.dumps({'error': 'cannot generate runtime config'})
+            return Response(msg, status=400, mimetype='application/json')
+
+    runtime_file = open('./.runtime-config.json', 'w')
+    runtime_config_text = json.dumps(apps)
+    runtime_file.write(runtime_config_text)
+    runtime_file.close()
 
     msg = json.dumps({'status': 'ok'})
     return Response(msg, status=200, mimetype='application/json')
@@ -78,11 +102,11 @@ def exec_shell(cmd):
 def schedule_file_cleanup():
     try:
         print 'Trying to clean .scheduled'
-        exec_shell(['rm', '-r', './.scheduled'])
+        print exec_shell(['rm', '-r', './.scheduled'])
     except:
         print 'No such directory? Creating .scheduled'
     finally:
-        exec_shell(['mkdir', './.scheduled'])
+        print exec_shell(['mkdir', './.scheduled'])
 
 def generate_replica_pod(image, node, port, unique_order):
     temp_pod_file = open('./templates/pod.json', 'r')

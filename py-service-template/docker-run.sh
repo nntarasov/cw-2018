@@ -1,4 +1,4 @@
 #!/bin/sh
 
-docker run -p 4000:80 ntarasov/py-service
+docker run -p 30080:30080 py-service
 docker container ls
