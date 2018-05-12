@@ -67,7 +67,7 @@ def schedule():
     while True:
         out = exec_shell(['kubectl', 'get', 'pods,services'])
         print out
-        time.sleep(10)
+        time.sleep(5)
         if out.find('Terminating') == -1:
             break
 
@@ -77,6 +77,27 @@ def schedule():
     except:
         msg = json.dumps({'error': 'cannot run pods/services'})
         return Response(msg, status=400, mimetype='application/json')
+
+    # Wait for start
+    while True:
+        text = exec_shell(['./get-ready-pods.sh'])
+        print text
+        ready = True
+        # app apps now in play
+        for app in apps:
+            app_name = str(app['image']).split('/')[-1]
+            app_ready = text.find(app_name) != -1
+            ready = ready and app_ready
+
+            if app_ready:
+                print 'App {name} is ready'.format(name=app_name)
+            else:
+                print 'Waiting for app {name}.'.format(name=app_name)
+
+        if ready:
+            print 'All apps now in play'
+            break
+        time.sleep(5)    
 
     # Generate runtime config
     hosts = []
@@ -88,7 +109,11 @@ def schedule():
             app['actual_port'] = int(exec_shell(['./get-actual-port.sh', app_name]))
             print 'Actual port ' + app_name + ' -> ' + str(app['actual_port'])
 
-            actual_ips = exec_shell(['./get-actual-ips.sh', app_name]).split('\n')
+            print './get-actual-ips.sh ' + app_name
+            actual_ips_text = exec_shell(['./get-actual-ips.sh', app_name])
+            print actual_ips_text
+
+            actual_ips = actual_ips_text.split('\n')
             print 'actual_ips: ' + json.dumps(actual_ips)
 
             app['actual_ips'] = actual_ips
