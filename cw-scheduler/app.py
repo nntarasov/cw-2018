@@ -7,6 +7,7 @@ import socket
 import json
 import subprocess
 import time
+import urllib2
 
 from string import Template
 
@@ -78,12 +79,21 @@ def schedule():
         return Response(msg, status=400, mimetype='application/json')
 
     # Generate runtime config
+    hosts = []
+
     for app in apps:
         app_name = str(app['image']).split('/')[-1]
         print 'get-actual-port.sh ' + app_name
         try:
             app['actual_port'] = int(exec_shell(['./get-actual-port.sh', app_name]))
             print 'Actual port ' + app_name + ' -> ' + str(app['actual_port'])
+
+            actual_ips = exec_shell(['./get-actual-ips.sh', app_name]).split('\n')
+            print 'actual_ips: ' + json.dumps(actual_ips)
+
+            app['actual_ips'] = actual_ips
+            for actual_ip in actual_ips:
+                hosts.append({ ip: actual_ip, port: app['actual_port']})
         except:
             msg = json.dumps({'error': 'cannot generate runtime config'})
             return Response(msg, status=400, mimetype='application/json')
@@ -92,6 +102,13 @@ def schedule():
     runtime_config_text = json.dumps(apps)
     runtime_file.write(runtime_config_text)
     runtime_file.close()
+
+    # Pass runtime config to applications
+    for host in hosts:
+        url = '{ip}:{port}/configure'.format(ip=host['ip'], port=host[port])
+        print 'curl ' + url
+        req = urllib2.Request(url, data=runtime_config_text)
+        print urllib2.urlopen(req).read()
 
     msg = json.dumps({'status': 'ok'})
     return Response(msg, status=200, mimetype='application/json')
