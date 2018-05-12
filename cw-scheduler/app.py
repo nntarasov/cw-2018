@@ -130,6 +130,7 @@ def schedule():
         url = 'http://{ip}:{port}/configure'.format(ip=host['ip'], port=host['port'])
         print 'curl ' + url
         req = urllib2.Request(url, data=runtime_config_text)
+        req.add_header('Content-Type', 'application/json')
         print urllib2.urlopen(req).read()
 
     msg = json.dumps({'status': 'ok'})

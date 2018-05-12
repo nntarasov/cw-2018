@@ -29,3 +29,19 @@ curl http://node-0.ntarasov.ru:13337/schedule -d '
   ]
 }
 ' -H 'Content-Type:application/json' -i
+
+curl http://localhost:30080/configure -d '
+{
+  "applications": [
+    {
+      "image": "ntarasov\/py-service",
+      "port": 30080,
+      "scenarioAppId": 1,
+      "replicas": [
+        { "node": "cw-node-0" },
+        { "node": "cw-node-2" }
+      ]
+    }
+  ]
+}
+' -H 'Content-Type:application/json' -i
