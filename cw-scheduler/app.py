@@ -113,12 +113,12 @@ def schedule():
         actual_ips_text = exec_shell(['./get-actual-ips.sh', app_name])
         print actual_ips_text
 
-        actual_ips = actual_ips_text.split('\n')
+        actual_ips = actual_ips_text.strip('\n').split('\n')
         print 'actual_ips: ' + json.dumps(actual_ips)
 
         app['actual_ips'] = actual_ips
         for actual_ip in actual_ips:
-            hosts.append({ ip: actual_ip, port: app['actual_port']})
+            hosts.append({'ip': actual_ip, 'port': app['actual_port']})
 
     runtime_file = open('../.runtime-config.json', 'w')
     runtime_config_text = json.dumps(apps)
@@ -127,7 +127,7 @@ def schedule():
 
     # Pass runtime config to applications
     for host in hosts:
-        url = '{ip}:{port}/configure'.format(ip=host['ip'], port=host[port])
+        url = 'http://{ip}:{port}/configure'.format(ip=host['ip'], port=host['port'])
         print 'curl ' + url
         req = urllib2.Request(url, data=runtime_config_text)
         print urllib2.urlopen(req).read()
