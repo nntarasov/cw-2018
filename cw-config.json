@@ -1,9 +1,24 @@
 {
     "apps": [
         {
-            "image": "ntarasov/py-service",
-            "port": "30080",
+            "image": "ntarasov/cw-model-front",
+            "port": "30081",
             "scenarioAppId": 1
+        },
+        {
+            "image": "ntarasov/cw-model-user",
+            "port": "30082",
+            "scenarioAppId": 2
+        },
+        {
+            "image": "ntarasov/cw-model-post",
+            "port": "30083",
+            "scenarioAppId": 3
+        },
+        {
+            "image": "ntarasov/cw-model-comment",
+            "port": "30084",
+            "scenarioAppId": 4
         }
     ],
     "nodes": [

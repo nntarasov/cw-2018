@@ -1,0 +1,24 @@
+service front (no db) 
+	/feed -> 
+		calls post /preview 5 times
+	/viewpost
+		calls post /view
+	/viewacc
+		calls user /auth
+		calls user /view
+	/createcomment
+		calls comment /create
+
+service user
+	/auth (db: 3ms)
+	/view (db: 4ms)
+
+service post
+	/view
+		calls comment /viewlist (db: 15ms)
+	/preview (db: 7ms)
+
+sevice comment
+	/viewlist (db: 9ms)
+	/create (db: 6ms)
+		calls user /auth

@@ -2,12 +2,35 @@ curl http://localhost:13337/schedule -d '
 {
   "applications": [
     {
-      "image": "ntarasov\/py-service",
-      "port": 30080,
+      "image": "ntarasov\/cw-model-front",
+      "port": 30081,
       "scenarioAppId": 1,
       "replicas": [
-        { "node": "cw-node-0" },
+        { "node": "cw-node-0" }
+      ]
+    },
+    {
+      "image": "ntarasov\/cw-model-user",
+      "port": 30082,
+      "scenarioAppId": 2,
+      "replicas": [
+        { "node": "cw-node-1" }
+      ]
+    },
+    {
+      "image": "ntarasov\/cw-model-post",
+      "port": 30083,
+      "scenarioAppId": 3,
+      "replicas": [
         { "node": "cw-node-2" }
+      ]
+    },
+    {
+      "image": "ntarasov\/cw-model-comment",
+      "port": 30084,
+      "scenarioAppId": 4,
+      "replicas": [
+        { "node": "cw-node-4" }
       ]
     }
   ]
