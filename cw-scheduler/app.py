@@ -88,7 +88,7 @@ def schedule():
             msg = json.dumps({'error': 'cannot generate runtime config'})
             return Response(msg, status=400, mimetype='application/json')
 
-    runtime_file = open('./.runtime-config.json', 'w')
+    runtime_file = open('../.runtime-config.json', 'w')
     runtime_config_text = json.dumps(apps)
     runtime_file.write(runtime_config_text)
     runtime_file.close()
