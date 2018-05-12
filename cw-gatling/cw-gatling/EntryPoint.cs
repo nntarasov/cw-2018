@@ -116,6 +116,8 @@ namespace cw_gatling
                 _nodes = preparedData.Nodes.ToArray();
             }
             
+            Console.WriteLine($"Total scenario count: {preparedData.Scenarios.Count()}");
+            
             var stopwatch = Stopwatch.StartNew();
             
             var threads = new Thread[preparedData.WorkersCount];
@@ -185,6 +187,8 @@ namespace cw_gatling
 
                     // Slow?
                     // Too many instances, GC affects
+                    var stopwatch = Stopwatch.StartNew();
+                    
                     var request = WebRequest.Create(url);
                     var responseStream = request.GetResponse().GetResponseStream();
                     if (responseStream == null)
@@ -192,7 +196,7 @@ namespace cw_gatling
                     var reader = new StreamReader(responseStream);
                     string plainText = reader.ReadToEnd();
 
-                    Console.WriteLine($"Response: {plainText}");
+                    Console.WriteLine($"Response: {plainText} elapsed:{stopwatch.ElapsedMilliseconds}");
                 }
             }
         }
