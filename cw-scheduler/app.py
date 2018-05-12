@@ -105,23 +105,20 @@ def schedule():
     for app in apps:
         app_name = str(app['image']).split('/')[-1]
         print 'get-actual-port.sh ' + app_name
-        try:
-            app['actual_port'] = int(exec_shell(['./get-actual-port.sh', app_name]))
-            print 'Actual port ' + app_name + ' -> ' + str(app['actual_port'])
 
-            print './get-actual-ips.sh ' + app_name
-            actual_ips_text = exec_shell(['./get-actual-ips.sh', app_name])
-            print actual_ips_text
+        app['actual_port'] = int(exec_shell(['./get-actual-port.sh', app_name]))
+        print 'Actual port ' + app_name + ' -> ' + str(app['actual_port'])
 
-            actual_ips = actual_ips_text.split('\n')
-            print 'actual_ips: ' + json.dumps(actual_ips)
+        print './get-actual-ips.sh ' + app_name
+        actual_ips_text = exec_shell(['./get-actual-ips.sh', app_name])
+        print actual_ips_text
 
-            app['actual_ips'] = actual_ips
-            for actual_ip in actual_ips:
-                hosts.append({ ip: actual_ip, port: app['actual_port']})
-        except:
-            msg = json.dumps({'error': 'cannot generate runtime config'})
-            return Response(msg, status=400, mimetype='application/json')
+        actual_ips = actual_ips_text.split('\n')
+        print 'actual_ips: ' + json.dumps(actual_ips)
+
+        app['actual_ips'] = actual_ips
+        for actual_ip in actual_ips:
+            hosts.append({ ip: actual_ip, port: app['actual_port']})
 
     runtime_file = open('../.runtime-config.json', 'w')
     runtime_config_text = json.dumps(apps)
