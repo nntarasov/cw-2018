@@ -5,11 +5,11 @@
             "actions": [
                 {
                     "appId": 1,
-                    "url": "/hello"
+                    "url": "hello"
                 },
                 {
                     "appId": 1,
-                    "url": "/world"
+                    "url": "world"
                 }
             ]
         },
@@ -17,11 +17,19 @@
             "actions": [
                 {
                     "appId": 1,
-                    "url": "/hello"
+                    "url": "hello"
                 },
                 {
                     "appId": 1,
-                    "url": "/world"
+                    "url": "world"
+                }
+            ]
+        },
+        {
+            "actions": [
+                {
+                    "appId": 1,
+                    "url": ""
                 }
             ]
         },

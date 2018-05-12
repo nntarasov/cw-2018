@@ -24,5 +24,5 @@
             "host": "node-4.ntarasov.ru"
         }
     ],
-    "scenarioFile": "cw-scenario.json"
+    "scenarioFile": "../cw-scenario.json"
 }
