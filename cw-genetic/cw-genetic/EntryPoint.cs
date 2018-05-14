@@ -96,7 +96,7 @@ namespace cw_genetic
         {
             if (argv.Length < 2)
             {
-                Console.WriteLine("Usage: $ cw-genetic {config_file.json} {cw-gatling.exe}");
+                Console.WriteLine("Usage: $ cw-genetic {config_file.json} {cw-gatling.exe} {epoch_count} [{generation_count} {mutation_p} {max_replicas_count}]");
                 return;
             }
 
@@ -105,11 +105,23 @@ namespace cw_genetic
             var config = configText.FromJson<CwConfig>();
 
             _gatlingPath = argv[1];
-            
+
             var g = new Genetic(config.Apps, config.Nodes, EvaluateGeneration);
-            g.MoveNext();
+
+            int epochCount = int.Parse(argv[2]);
             
-            Console.WriteLine(g.Current.Dump());
+            if (argv.Length > 3)
+            {
+                g.GenerationSize = int.Parse(argv[3]);
+                g.MutationProbability = double.Parse(argv[4]);
+                g.MaxReplicaCount = int.Parse(argv[5]);
+            }
+
+            for (int i = 0; i < epochCount; ++i)
+            {
+                Logger.Log($"Generation number: {i + 1}");
+                g.MoveNext();
+            }
             return;
         }
 
@@ -128,8 +140,8 @@ namespace cw_genetic
             p.WaitForExit();
 
             string log = File.ReadAllText("./shootreport.log");
-            Logger.Log("Shooting report");
-            Logger.Log(log);
+            //Logger.Log("Shooting report");
+            //Logger.Log(log);
             string json = log.Split(new []{'\n'}, StringSplitOptions.RemoveEmptyEntries).Last();
             Logger.Log($"Json: {json}");
             Logger.Log($"Parsed: {json.FromJson<CwElapsed>().Dump()}");
