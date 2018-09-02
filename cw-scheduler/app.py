@@ -80,7 +80,10 @@ def schedule():
 
     # Wait for start
     while True:
-        text = exec_shell(['./get-ready-pods.sh'])
+        try:
+            text = exec_shell(['./get-ready-pods.sh'])
+        except:
+            text = ''
         print text
         ready = True
         # app apps now in play
