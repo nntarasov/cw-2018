@@ -8,6 +8,7 @@ import json
 import subprocess
 import time
 import urllib2
+import fcntl
 
 from string import Template
 
@@ -139,8 +140,34 @@ def schedule():
     msg = json.dumps({'status': 'ok'})
     return Response(msg, status=200, mimetype='application/json')
 
+
+# uses non-blocking execute with timeout
 def exec_shell(cmd):
-    return subprocess.check_output(cmd)
+    response = ''
+    trycnt = 0
+    # run the shell as a subprocess:
+    p = subprocess.Popen(cmd,
+            stdout = subprocess.PIPE, 
+            stderr = subprocess.PIPE, 
+            shell = False)
+    # set the O_NONBLOCK flag of p.stdout file descriptor:
+    flags = fcntl.fcntl(p.stdout, fcntl.F_GETFL) # get current p.stdout flags
+    fcntl.fcntl(p.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+    # get the output
+    while True:
+        time.sleep(1 + 5 * max(0, trycnt - 1))
+        buf = os.read(p.stdout.fileno(), 1024)
+        response += buf
+        if trycnt > 1:
+            if len(response) == 0 :
+                p.kill()
+                return exec_shell(cmd)
+            break
+        elif len(response) > 0 and len(buf) == 0:
+            break
+        trycnt += 1
+    print response
+
 
 def schedule_file_cleanup():
     try:
