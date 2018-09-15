@@ -9,14 +9,17 @@ import subprocess
 import time
 import urllib2
 import fcntl
+from threading import Lock
 
 from string import Template
 
 app = Flask(__name__)
+lock = Lock()
 
 @app.route("/")
 def default():
-    msg = json.dumps({'message': 'Scheduler works on host: ' + socket.gethostname()})
+    with lock:
+        msg = json.dumps({'message': 'Scheduler works on host: ' + socket.gethostname()})
     return Response(msg, status=200, mimetype='application/json')
 
 
@@ -32,6 +35,13 @@ def default():
 
 @app.route("/schedule", methods=['POST'])
 def schedule():
+    print '++++++++++++++++++++++++++++++++++ /schedule REQUEST RECEIVED'
+    with lock:
+        response = schedule_internal()
+        print response
+        return response
+
+def schedule_internal():
     if not request.is_json:
         msg = json.dumps({'error': 'expected JSON'})
         return Response(msg, status=400, mimetype='application/json')
@@ -57,12 +67,8 @@ def schedule():
                 .format(image=image, port=port)
         generate_application_service(image, port)
 
-    # Stops all running entities by label
-    try:
-        print exec_shell(['kubectl', 'delete', 'pods,services', '-l', 'auto_created=true'])
-    except:
-        msg = json.dumps({'error': 'cannot delete existing pods/services by label'})
-        return Response(msg, status=400, mimetype='application/json')
+    # Stops all running entities by label 'auto_created'
+    stop_running()
 
     # Wait while all pods will be stopped
     while True:
@@ -141,8 +147,19 @@ def schedule():
     return Response(msg, status=200, mimetype='application/json')
 
 
+# Stops all running entities by label 'auto_created'
+def stop_running():
+    while True:
+        try:
+            print exec_shell(['kubectl', 'delete', 'pods,services', '-l', 'auto_created=true'])
+            return;
+        except:
+            msg = json.dumps({'error': 'cannot delete existing pods/services by label'})
+            print msg
+
 # uses non-blocking execute with timeout
 def exec_shell(cmd):
+    print 'shell: executing ' + ' '.join(cmd)
     response = ''
     trycnt = 0
     # run the shell as a subprocess:
@@ -157,15 +174,28 @@ def exec_shell(cmd):
     while True:
         time.sleep(1 + 5 * max(0, trycnt - 1))
         buf = os.read(p.stdout.fileno(), 1024)
+        print buf
+        exit_code = p.poll()
+        print 'shell: exit code: ' + str(exit_code)
+        print buf
         response += buf
-        if trycnt > 1:
+        if exit_code != None:
+            if exit_code != 0:
+                print 'Bad exit code ' + str(exit_code)
+                #raise Exception(str(exit_code))
+                p.kill()
+                return exec_shell(cmd)
+            return response
+        if trycnt > 2:
             if len(response) == 0 :
                 p.kill()
                 return exec_shell(cmd)
-            break
+            #break
+            continue
         elif len(response) > 0 and len(buf) == 0:
-            break
+            continue
         trycnt += 1
+    p.kill()
     print response
 
 

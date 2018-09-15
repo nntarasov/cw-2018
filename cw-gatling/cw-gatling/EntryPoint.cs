@@ -185,8 +185,6 @@ namespace cw_gatling
 
                     Console.WriteLine($"Request: {url}");
 
-                    // Slow?
-                    // Too many instances, GC affects
                     var stopwatch = Stopwatch.StartNew();
                     
                     var request = WebRequest.Create(url);

@@ -175,6 +175,7 @@ namespace cw_genetic
                 catch (Exception)
                 {
                     Logger.Log("Exception occured while scheduling");
+                    throw;
                 }
             }
         }
