@@ -1,4 +1,4 @@
-service front (no db) 
+service front (no delay) 
 	/feed -> 
 		calls post /preview 5 times
 	/viewpost
@@ -10,15 +10,15 @@ service front (no db)
 		calls comment /create
 
 service user
-	/auth (db: 3ms)
-	/view (db: 4ms)
+	/auth (delay: 3ms)
+	/view (delay: 4ms)
 
 service post
 	/view
-		calls comment /viewlist (db: 15ms)
-	/preview (db: 7ms)
+		calls comment /viewlist (delay: 15ms)
+	/preview (delay: 7ms)
 
 sevice comment
-	/viewlist (db: 9ms)
-	/create (db: 6ms)
+	/viewlist (delay: 9ms)
+	/create (delay: 6ms)
 		calls user /auth

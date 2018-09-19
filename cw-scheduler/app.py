@@ -51,6 +51,7 @@ def schedule_internal():
     args = request.get_json()
     apps = args['applications'];
     unique_order = 0
+    pods = []
 
     for app in apps:
 
@@ -62,7 +63,8 @@ def schedule_internal():
             unique_order += 1
             print 'Generating config: image: {image}, node: {node}, ord: {ord}'\
                 .format(image=image, node=node, ord=unique_order)
-            generate_replica_pod(image, node, port, unique_order)
+            pod_name = generate_replica_pod(image, node, port, unique_order)
+            pods.append(pod_name)
         print 'Generating config for service. image: {image}, port: {port}'\
                 .format(image=image, port=port)
         generate_application_service(image, port)
@@ -94,18 +96,18 @@ def schedule_internal():
         print text
         ready = True
         # app apps now in play
-        for app in apps:
-            app_name = str(app['image']).split('/')[-1]
-            app_ready = text.find(app_name) != -1
-            ready = ready and app_ready
+        for pod in pods:
+            #app_name = str(app['image']).split('/')[-1]
+            pod_ready = text.find(pod) != -1
+            ready = ready and pod_ready
 
-            if app_ready:
-                print 'App {name} is ready'.format(name=app_name)
+            if pod_ready:
+                print 'Pod {name} is ready'.format(name=pod)
             else:
-                print 'Waiting for app {name}.'.format(name=app_name)
+                print 'Waiting for pod {name}.'.format(name=pod)
 
         if ready:
-            print 'All apps now in play'
+            print 'All pods now in play'
             break
         time.sleep(5)    
 
@@ -149,13 +151,13 @@ def schedule_internal():
 
 # Stops all running entities by label 'auto_created'
 def stop_running():
+    print 'Trying to remove existing pods/services by label'
     while True:
         try:
             print exec_shell(['kubectl', 'delete', 'pods,services', '-l', 'auto_created=true'])
             return;
         except:
-            msg = json.dumps({'error': 'cannot delete existing pods/services by label'})
-            print msg
+            print 'Processing...'
 
 # uses non-blocking execute with timeout
 def exec_shell(cmd):
@@ -174,15 +176,12 @@ def exec_shell(cmd):
     while True:
         time.sleep(1 + 5 * max(0, trycnt - 1))
         buf = os.read(p.stdout.fileno(), 1024)
-        print buf
         exit_code = p.poll()
         print 'shell: exit code: ' + str(exit_code)
-        print buf
         response += buf
         if exit_code != None:
             if exit_code != 0:
                 print 'Bad exit code ' + str(exit_code)
-                #raise Exception(str(exit_code))
                 p.kill()
                 return exec_shell(cmd)
             return response
@@ -208,6 +207,7 @@ def schedule_file_cleanup():
     finally:
         print exec_shell(['mkdir', './.scheduled'])
 
+# returns pod name
 def generate_replica_pod(image, node, port, unique_order):
     temp_pod_file = open('./templates/pod.json', 'r')
     template = Template(temp_pod_file.read())
@@ -226,7 +226,7 @@ def generate_replica_pod(image, node, port, unique_order):
     pod_file = open('./.scheduled/' + pod_name  + '.conf', 'w')
     pod_file.write(contents)
     pod_file.close()
-    return
+    return pod_name
 
 def generate_application_service(image, port):
     temp_service_file = open('./templates/service.json', 'r')

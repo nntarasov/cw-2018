@@ -205,7 +205,7 @@ namespace cw_genetic
 
             var firstPart = first.GeneItems.Take(pivotIndex).ToList();
             var secondPart = second.GeneItems.Skip(pivotIndex).ToList();
-            foreach (var item in firstPart.Union(secondPart))
+            foreach (var item in firstPart.Concat(secondPart))
                 gene.GeneItems.Add(item);
 
             var mutationFactor = _random.NextDouble() <= _mutationProbability;
@@ -268,7 +268,7 @@ namespace cw_genetic
                 Gene childGene = null;
                 
                 while (IsBadGene(childGene))
-                    childGene = Crossingover(parentOneGene, parentOneGene);
+                    childGene = Crossingover(parentOneGene, parentTwoGene);
                 
                 Logger.Log($"Evolution: = child : {childGene.Dump()}");
                 children.Genes.Add(childGene);

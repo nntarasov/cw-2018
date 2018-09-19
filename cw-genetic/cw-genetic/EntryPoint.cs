@@ -195,7 +195,7 @@ namespace cw_genetic
                 .ToArray();
             
             ExecScheduling(apps);
-            
+            Logger.Log("OK. Evaluating gene...");
             return ExecShooting();
         }
         
